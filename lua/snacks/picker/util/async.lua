@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 ---@class snacks.picker.async
 local M = {}
 

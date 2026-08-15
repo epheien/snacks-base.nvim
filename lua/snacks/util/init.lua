@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 ---@class snacks.util
 ---@field spawn snacks.spawn
 ---@field lsp snacks.lsp

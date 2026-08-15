@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 ---@class snacks.win
 ---@field id number
 ---@field buf? number

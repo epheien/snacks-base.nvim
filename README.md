@@ -2,8 +2,10 @@
 
 Minimal runtime extracted from snacks.nvim for standalone split packages.
 
-This package keeps the original `Snacks` namespace and is intended to be used
-mutually exclusively with the full snacks.nvim package.
+The runtime is exposed through `require("snacks")` without assigning
+`_G.Snacks`. It still uses the original `snacks.*` Lua module namespace and is
+therefore intended to be used mutually exclusively with the full snacks.nvim
+package.
 
 Extraction and update workflow notes are in [docs/extraction.md](docs/extraction.md).
 

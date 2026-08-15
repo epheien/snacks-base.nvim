@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 ---@class snacks.lsp
 local M = {}
 

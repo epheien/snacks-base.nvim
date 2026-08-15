@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 ---@class vim.fn.jobstart.Opts
 ---@field clear_env? boolean
 ---@field cwd? string

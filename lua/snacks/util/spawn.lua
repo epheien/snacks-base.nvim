@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 local Async = require("snacks.picker.util.async")
 
 ---@class snacks.spawn

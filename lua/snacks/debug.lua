@@ -1,3 +1,5 @@
+local Snacks = require("snacks")
+
 local M = {}
 
 local function shell_join(cmd, args)

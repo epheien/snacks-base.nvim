@@ -118,6 +118,17 @@ local function copy_tree(src, dest, filter)
   end
 end
 
+local function localize_snacks(path)
+  for _, file in ipairs(list_files(path)) do
+    if file:match("%.lua$") then
+      local data = read_file(file)
+      if data:find("Snacks.", 1, true) and not data:find('local Snacks = require("snacks")', 1, true) then
+        write_file(file, 'local Snacks = require("snacks")\n\n' .. data)
+      end
+    end
+  end
+end
+
 local script = arg[0] or "scripts/extract-image.lua"
 local script_abs = abs(script)
 local script_dir = dirname(script_abs)
@@ -232,7 +243,6 @@ setmetatable(M, {
   end,
 })
 
-_G.Snacks = M
 _G.svim = vim.fn.has("nvim-0.11") == 1 and vim or require("snacks.compat")
 
 M.version = "base"
@@ -369,6 +379,8 @@ return M
 ]===]
 
 base_runtime["lua/snacks/debug.lua"] = [===[
+local Snacks = require("snacks")
+
 local M = {}
 
 local function shell_join(cmd, args)
@@ -409,6 +421,8 @@ return M
 ]===]
 
 base_runtime["lua/snacks/health.lua"] = [===[
+local Snacks = require("snacks")
+
 local M = {}
 
 local function health()
@@ -554,8 +568,10 @@ base_runtime["README.md"] = [===[
 
 Minimal runtime extracted from snacks.nvim for standalone split packages.
 
-This package keeps the original `Snacks` namespace and is intended to be used
-mutually exclusively with the full snacks.nvim package.
+The runtime is exposed through `require("snacks")` without assigning
+`_G.Snacks`. It still uses the original `snacks.*` Lua module namespace and is
+therefore intended to be used mutually exclusively with the full snacks.nvim
+package.
 
 Extraction and update workflow notes are in [docs/extraction.md](docs/extraction.md).
 
@@ -677,6 +693,7 @@ copy_file(root .. "/lua/snacks/win.lua", base_target .. "/lua/snacks/win.lua")
 copy_tree(root .. "/lua/snacks/util", base_target .. "/lua/snacks/util")
 copy_file(root .. "/lua/snacks/picker/util/async.lua", base_target .. "/lua/snacks/picker/util/async.lua")
 write_runtime(base_target, base_runtime)
+localize_snacks(base_target .. "/lua")
 run("chmod +x " .. shq(base_target .. "/scripts/extract-image.lua"))
 
 copy_tree(root .. "/lua/snacks/image", image_target .. "/lua/snacks/image")
@@ -689,6 +706,7 @@ copy_tree(root .. "/queries", image_target .. "/queries", function(rel)
   return rel:match("/images%.scm$") or rel:match("/injections%.scm$")
 end)
 write_runtime(image_target, image_runtime)
+localize_snacks(image_target .. "/lua")
 
 print("generated " .. base_target)
 print("generated " .. image_target)

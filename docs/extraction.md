@@ -10,9 +10,10 @@ original project.
 - `snacks-base.nvim`
   - Generated at `build/snacks-base.nvim`.
   - Remote: `https://github.com/epheien/snacks-base.nvim`.
-  - Provides the original `Snacks` global, minimal config helpers, `Snacks.util`,
-    `Snacks.win`, `Snacks.health`, `Snacks.debug`, `Snacks.notify`, and the
-    `Snacks.picker.util.tpl` shim used by the image module.
+  - Provides a minimal `require("snacks")` module with config helpers,
+    `Snacks.util`, `Snacks.win`, `Snacks.health`, `Snacks.debug`,
+    `Snacks.notify`, and the `Snacks.picker.util.tpl` shim used by the image
+    module. It does not assign `_G.Snacks`.
 
 - `snacks-image.nvim`
   - Generated at `build/snacks-image.nvim`.
@@ -20,9 +21,10 @@ original project.
   - Contains the original `lua/snacks/image/*`, image Tree-sitter queries,
     image docs, vimdoc, and image test fixtures.
 
-The split packages intentionally keep the original `snacks.*` Lua namespace and
-`_G.Snacks`. They are intended to be used instead of the full `snacks.nvim`, not
-alongside it.
+The split packages intentionally keep the original `snacks.*` Lua module
+namespace, but do not assign `_G.Snacks`. The module names still overlap with
+the full `snacks.nvim`, so the packages are not yet intended to run alongside
+it.
 
 ## Script
 
@@ -108,7 +110,7 @@ git push
 ## Notes
 
 - Do not run the split plugins together with full `snacks.nvim`; their Lua module
-  names and global `Snacks` namespace intentionally overlap.
+  names still intentionally overlap.
 - `snacks-image.nvim` requires `snacks-base.nvim` earlier on `runtimepath`.
 - The generated `.gitignore` excludes `.DS_Store` and `doc/tags`.
 - `.snacks-extracted-generated` is intentionally committed. It is the safety
