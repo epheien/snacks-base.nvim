@@ -566,26 +566,56 @@ vim.g.loaded_snacks_base = 1
 base_runtime["README.md"] = [===[
 # snacks-base.nvim
 
-Minimal runtime extracted from snacks.nvim for standalone split packages.
+Minimal runtime extracted from
+[folke/snacks.nvim](https://github.com/folke/snacks.nvim) for standalone split
+packages such as
+[`snacks-image.nvim`](https://github.com/epheien/snacks-image.nvim).
 
-The runtime is exposed through `require("snacks")` without assigning
-`_G.Snacks`. It still uses the original `snacks.*` Lua module namespace and is
-therefore intended to be used mutually exclusively with the full snacks.nvim
-package.
+> [!CAUTION]
+> `snacks-base.nvim` **cannot coexist** with the full `snacks.nvim` plugin in the
+> same Neovim instance. Although this package does not assign `_G.Snacks`, both
+> plugins provide the same `snacks.*` Lua modules. Runtimepath order would decide
+> which implementation is loaded. Use this package only as a dependency of the
+> split plugins, or use the full `snacks.nvim` plugin instead.
 
-Extraction and update workflow notes are in [docs/extraction.md](docs/extraction.md).
+## Requirements
 
-Example with lazy.nvim:
+- Neovim >= 0.9.4.
+- No external plugin dependency. Feature packages that depend on this runtime
+  may have additional requirements.
+
+## Installation
+
+Most users should install this package through a split feature package. For
+example, with [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-  dir = "/path/to/snacks-base.nvim",
-  main = "snacks",
-  opts = {
-    image = {},
+  "epheien/snacks-image.nvim",
+  dependencies = {
+    {
+      "epheien/snacks-base.nvim",
+      main = "snacks",
+      opts = {
+        image = {},
+      },
+    },
   },
 }
 ```
+
+The extracted runtime is exposed through `require("snacks")` without creating a
+global `Snacks` variable:
+
+```lua
+local Snacks = require("snacks")
+Snacks.setup({
+  image = {},
+})
+```
+
+Extraction and update workflow notes are in
+[docs/extraction.md](docs/extraction.md).
 ]===]
 
 base_runtime["scripts/extract-image.lua"] = self_script
@@ -646,37 +676,74 @@ end)
 image_runtime["README.md"] = [===[
 # snacks-image.nvim
 
-Standalone `Snacks.image` package extracted from snacks.nvim.
+Standalone extraction of [`Snacks.image`](https://github.com/folke/snacks.nvim/blob/main/docs/image.md)
+from [folke/snacks.nvim](https://github.com/folke/snacks.nvim).
 
-Requires `snacks-base.nvim` on the runtime path. This package keeps the original
-`Snacks.image` namespace and is intended to be used mutually exclusively with
-the full snacks.nvim package.
+> [!CAUTION]
+> `snacks-image.nvim` and its `snacks-base.nvim` dependency **cannot coexist**
+> with the full `snacks.nvim` plugin in the same Neovim instance. The split
+> packages still use the original `snacks.*` Lua module namespace, so runtimepath
+> order would decide which implementation is loaded. Disabling only
+> `Snacks.image` in the full plugin does not avoid this conflict. Use either the
+> full plugin or the split packages.
 
-Example with lazy.nvim:
+## Requirements
+
+- Neovim >= 0.9.4.
+- [`epheien/snacks-base.nvim`](https://github.com/epheien/snacks-base.nvim) is a
+  required plugin dependency and must load first.
+- A terminal supporting the
+  [Kitty Graphics Protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/):
+  [kitty](https://sw.kovidgoyal.net/kitty/),
+  [Ghostty](https://ghostty.org/), or
+  [WezTerm](https://wezfurlong.org/wezterm/). WezTerm has limited support and
+  cannot render inline images.
+- [ImageMagick](https://imagemagick.org/) is required to convert formats other
+  than PNG.
+
+Optional tools depend on the content being rendered:
+
+- Tree-sitter parsers for inline images in documents.
+- `gs` for PDF files.
+- `mmdc` for Mermaid diagrams.
+- `tectonic` or `pdflatex` for LaTeX math expressions.
+- tmux requires graphics passthrough; the plugin attempts to enable it
+  automatically.
+
+## Installation
+
+With [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
   "epheien/snacks-image.nvim",
   dependencies = {
-    "epheien/snacks-base.nvim",
-  },
-}
-```
-
-Loading this package enables `Snacks.image` by default. To configure it or
-disable it explicitly, configure the base package before this plugin loads:
-
-```lua
-{
-  "epheien/snacks-base.nvim",
-  main = "snacks",
-  opts = {
-    image = {
-      -- enabled = false,
+    {
+      "epheien/snacks-base.nvim",
+      main = "snacks",
+      opts = {
+        image = {
+          -- Add Snacks.image options here.
+        },
+      },
     },
   },
 }
 ```
+
+Loading this package enables the image module by default. To disable it
+explicitly, set `image.enabled = false` in the `snacks-base.nvim` options.
+
+The module is available through the base package without creating a global
+`Snacks` variable:
+
+```lua
+local Snacks = require("snacks")
+Snacks.image.hover()
+```
+
+See [docs/image.md](docs/image.md) for the complete upstream image documentation
+and configuration reference.
 ]===]
 
 local function write_runtime(target, files)
