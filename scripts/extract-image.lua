@@ -640,9 +640,9 @@ Example with lazy.nvim:
 
 ```lua
 {
-  dir = "/path/to/snacks-image.nvim",
+  "epheien/snacks-image.nvim",
   dependencies = {
-    { dir = "/path/to/snacks-base.nvim" },
+    "epheien/snacks-base.nvim",
   },
 }
 ```
@@ -652,7 +652,7 @@ disable it explicitly, configure the base package before this plugin loads:
 
 ```lua
 {
-  dir = "/path/to/snacks-base.nvim",
+  "epheien/snacks-base.nvim",
   main = "snacks",
   opts = {
     image = {
