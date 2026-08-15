@@ -592,8 +592,37 @@ vim.g.loaded_snacks_image = 1
 
 vim.schedule(function()
   local ok, snacks = pcall(require, "snacks")
-  if ok and snacks.config.image and snacks.config.image.enabled then
-    require("snacks.image").setup()
+  if not ok then
+    return
+  end
+
+  -- Loading the standalone image package should enable it by default, just as
+  -- `Snacks.setup({ image = {} })` does in the monolithic package. Keep an
+  -- explicit `enabled = false` override intact.
+  local config = snacks.config.image
+  if config.enabled == nil then
+    config.enabled = true
+  end
+  if not config.enabled then
+    return
+  end
+
+  local image = require("snacks.image")
+  image.setup()
+
+  -- setup is deferred so that a user's Snacks config can be applied first.
+  -- A document opened on the command line may already have emitted FileType by
+  -- this point, so attach any matching buffers that are already loaded.
+  if image.config.doc.enabled then
+    local langs = image.langs()
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+        local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
+        if vim.tbl_contains(langs, lang) then
+          image.doc.attach(buf)
+        end
+      end
+    end
   end
 end)
 ]===]
@@ -611,16 +640,25 @@ Example with lazy.nvim:
 
 ```lua
 {
+  dir = "/path/to/snacks-image.nvim",
+  dependencies = {
+    { dir = "/path/to/snacks-base.nvim" },
+  },
+}
+```
+
+Loading this package enables `Snacks.image` by default. To configure it or
+disable it explicitly, configure the base package before this plugin loads:
+
+```lua
+{
   dir = "/path/to/snacks-base.nvim",
   main = "snacks",
   opts = {
-    image = {},
+    image = {
+      -- enabled = false,
+    },
   },
-}
-
-{
-  dir = "/path/to/snacks-image.nvim",
-  dependencies = { "snacks-base.nvim" },
 }
 ```
 ]===]
