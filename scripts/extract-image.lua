@@ -299,9 +299,13 @@ end
 ---@param ... T[]
 ---@return T
 function M.config.get(snack, defaults, ...)
-  local merge = {}
+  -- Build a todo list like upstream snacks.nvim: `config[snack]` may be nil
+  -- (e.g. `terminal` is not part of this fork's defaults), so guard it with
+  -- `or {}` — never let `select(i - 2, ...)` be evaluated with an empty `...`,
+  -- which raises "index out of range" in luajit.
+  local merge, todo = {}, { defaults, config[snack] or {}, ... }
   for i = 1, select("#", ...) + 2 do
-    local value = i == 1 and defaults or (i == 2 and config[snack] or select(i - 2, ...))
+    local value = todo[i]
     if type(value) == "table" then
       merge[#merge + 1] = vim.deepcopy(value)
     end
